@@ -14,9 +14,12 @@ const float GAMMA = 2.2;
 const vec3 REC_709_WEIGHTS = vec3(0.2126, 0.7152, 0.0722);
 const vec3 REC_601_WEIGHTS = vec3(0.299, 0.587, 0.114);
 
-const float LUMINANCE_THRESHOLD = 0.1;
+const float LUMINANCE_THRESHOLD = 0.25;
+const float LUMINANCE_SOFTNESS = 1.0;
+const float LUMINANCE_KNEE = max(LUMINANCE_THRESHOLD * LUMINANCE_SOFTNESS, 1e-5);
 
-const float BLUR_RADIUS = 3.0;
+const float BLUR_RADIUS = 2.5;
+const float BLUR_INTENSITY = 5.0;
 
 const float BLUR_OFFSET_START = BLUR_RADIUS * -1.0;
 const float BLUR_OFFSET_END = BLUR_RADIUS;
@@ -57,16 +60,19 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
             vec4 colour = texture(iChannel0, vec2(xOffset + uv.x, yOffset + uv.y));
             colour = vec4(toLinear(colour.rgb), colour.a);
 
-            float lum = step(LUMINANCE_THRESHOLD, luminance(colour.rgb, REC_709_WEIGHTS));
+            float lum = luminance(colour.rgb, REC_709_WEIGHTS);
+            float soft = clamp(lum - LUMINANCE_THRESHOLD + LUMINANCE_KNEE, 0.0, LUMINANCE_KNEE * 2.0);
+            soft = (soft * soft) / (4.0 * LUMINANCE_KNEE);
+            soft = max(soft, lum - LUMINANCE_THRESHOLD) / max(lum, 1e-5);
 
             float weight = weight(x, y);
             accumulatorWeights += weight;
-            accumulator += colour.rgb * lum * weight;
+            accumulator += colour.rgb * soft * weight;
         }
     }
 
     accumulator = accumulator / accumulatorWeights;
-    baseColour = vec4(baseColour.rgb + accumulator, baseColour.a);
+    baseColour = vec4(baseColour.rgb + (accumulator * BLUR_INTENSITY), baseColour.a);
 
     fragColor = vec4(toSRGB(baseColour.rgb), baseColour.a);
 }
