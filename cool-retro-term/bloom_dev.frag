@@ -5,7 +5,7 @@ precision highp float;
 #ifdef GHOSTTY_UNIFORMS
 
 #extension GL_GOOGLE_include_directive : require
-#include "ghostty.glsl"
+#include "../ghostty.glsl"
 
 #endif
 
