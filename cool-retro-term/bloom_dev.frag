@@ -9,70 +9,64 @@ precision highp float;
 
 #endif
 
-const float GAMMA = 2.2;
+// TODO: Tune STRENGTH's strength, extreme brightness on 1.0
+const float STRENGTH = 0.25;
 
-const vec3 REC_709_WEIGHTS = vec3(0.2126, 0.7152, 0.0722);
-const vec3 REC_601_WEIGHTS = vec3(0.299, 0.587, 0.114);
+// PERFORMANCE: Produces (2n + 1)² samples per pixel without optimisations
+// Let SAMPLE_RADIUS    = 21
+// (2 × 21 + 1)² = 43²  = 1849          samples per pixel
+// 1920 × 1080          = 2_073_600     pixels
+// 2_073_600 × 1849     = 3_834_086_400 samples per single frame
+const float SAMPLE_RADIUS = 21.0;
 
-const float LUMINANCE_THRESHOLD = 0.25;
-const float LUMINANCE_SOFTNESS = 1.0;
-const float LUMINANCE_KNEE = max(LUMINANCE_THRESHOLD * LUMINANCE_SOFTNESS, 1e-5);
+const float SIGMA = SAMPLE_RADIUS / 2.5; // Gaussian weight spread in sample grid steps
 
-const float BLUR_RADIUS = 2.5;
-const float BLUR_INTENSITY = 5.0;
-
-const float BLUR_OFFSET_START = BLUR_RADIUS * -1.0;
-const float BLUR_OFFSET_END = BLUR_RADIUS;
-
-const float SIGMA = BLUR_RADIUS / 3.0;
-
-// aka encode
-vec3 toSRGB(in vec3 colour) {
-    return pow(colour, vec3(1.0 / GAMMA));
-}
-
-// aka decode
-vec3 toLinear(in vec3 colour) {
-    return pow(colour, vec3(GAMMA));
-}
-
-float luminance(in vec3 colour, in vec3 weights) {
-    return dot(colour, weights);
-}
-
-float weight(in float x, in float y) {
-    return exp(-1.0 * (x * x + y * y) / (2.0 * pow(SIGMA, 2.0)));
+float sqr(in float x) {
+    return x * x;
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
-    vec4 baseColour = texture(iChannel0, uv).rgba;
-    baseColour = vec4(toLinear(baseColour.rgb), baseColour.a);
+    vec4 baseColour = texture(iChannel0, uv);
+    vec2 pxSize = 1.0 / iResolution.xy;
 
-    vec3 accumulator = vec3(0.0);
-    float accumulatorWeights = 0.0;
+    // HACK: Half-pixel shift enables sample to land on the shared corner of four texels.
+    // Exploits Ghostty's bilinear filtering
+    float tapOffset = 0.5;
 
-    for (float x = BLUR_OFFSET_START; x <= BLUR_OFFSET_END; x++) {
-        float xOffset = x / iResolution.x;
-        for (float y = BLUR_OFFSET_START; y <= BLUR_OFFSET_END; y++) {
-            float yOffset = y / iResolution.y;
+    const int radiusSteps = int(SAMPLE_RADIUS);
 
-            vec4 colour = texture(iChannel0, vec2(xOffset + uv.x, yOffset + uv.y));
-            colour = vec4(toLinear(colour.rgb), colour.a);
+    float[radiusSteps + 1] weights;
 
-            float lum = luminance(colour.rgb, REC_709_WEIGHTS);
-            float soft = clamp(lum - LUMINANCE_THRESHOLD + LUMINANCE_KNEE, 0.0, LUMINANCE_KNEE * 2.0);
-            soft = (soft * soft) / (4.0 * LUMINANCE_KNEE);
-            soft = max(soft, lum - LUMINANCE_THRESHOLD) / max(lum, 1e-5);
+    // PERFORMANCE: Precomputing weights exploiting properties:
+    // 1. exp(−(x²+y²)/(2σ²)) == exp(−x²/(2σ²)) × exp(−y²/(2σ²))
+    // 2. weights are symmetric i.e. weights[−i] == weights[i]
+    for (int i = 0; i <= radiusSteps; i++) {
+        weights[i] = exp(-sqr(float(i)) / (2.0 * sqr(SIGMA)));
+    }
 
-            float weight = weight(x, y);
-            accumulatorWeights += weight;
-            accumulator += colour.rgb * soft * weight;
+    vec3 sum = vec3(0.0);
+    float total = 0.0;
+
+    for (float x = -SAMPLE_RADIUS; x <= SAMPLE_RADIUS; x++) {
+        // PERFORMANCE: Initialise y such that x + y is even, then step by 2.
+        // Processing samples in checkerboard pattern, shedding 50% of the samples
+        for (float y = -SAMPLE_RADIUS + mod(x + SAMPLE_RADIUS, 2.0); y <= SAMPLE_RADIUS; y += 2.0) {
+            // PERFORMANCE: Process only samples inside the circle
+            // Sheds ~21% (1 - π/4) of samples
+            if (sqr(x) + sqr(y) > sqr(SAMPLE_RADIUS)) {
+                continue;
+            }
+
+            vec2 offset = vec2(x, y) + tapOffset * 2.0;
+            float weight = weights[int(abs(x))] * weights[int(abs(y))];
+
+            sum += texture(iChannel0, uv + offset * pxSize).rgb * weight;
+            total += weight;
         }
     }
 
-    accumulator = accumulator / accumulatorWeights;
-    baseColour = vec4(baseColour.rgb + (accumulator * BLUR_INTENSITY), baseColour.a);
+    vec3 glow = sum / total;
 
-    fragColor = vec4(toSRGB(baseColour.rgb), baseColour.a);
+    fragColor = vec4(baseColour.rgb + glow * STRENGTH, baseColour.a);
 }
