@@ -1,5 +1,4 @@
-// TODO: Tune STRENGTH's strength, extreme brightness on 1.0
-const float STRENGTH = 0.25;
+const float STRENGTH = 0.5;
 
 // PERFORMANCE: Produces (2n + 1)² samples per pixel without optimisations
 // Let SAMPLE_RADIUS    = 21
@@ -57,5 +56,5 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     vec3 glow = sum / total;
 
-    fragColor = vec4(baseColour.rgb + glow * STRENGTH, baseColour.a);
+    fragColor = vec4(baseColour.rgb + glow * clamp(pow(STRENGTH, 2.0), 0.0, 1.0), baseColour.a);
 }
