@@ -46,7 +46,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
                 continue;
             }
 
-            vec2 offset = vec2(x, y) + tapOffset * 2.0;
+            vec2 offset = vec2(x, y) * 2.0 + tapOffset;
             float weight = weights[int(abs(x))] * weights[int(abs(y))];
 
             sum += texture(iChannel0, uv + offset * pxSize).rgb * weight;
