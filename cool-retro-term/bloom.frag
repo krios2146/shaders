@@ -1,4 +1,4 @@
-const float STRENGTH = 0.5;
+const float STRENGTH = 0.5; // [0..1]
 
 // PERFORMANCE: Produces (2n + 1)² samples per pixel without optimisations
 // Let SAMPLE_RADIUS    = 21
@@ -7,8 +7,12 @@ const float STRENGTH = 0.5;
 // 2_073_600 × 1849     = 3_834_086_400 samples per single frame
 const float SAMPLE_RADIUS = 21.0;
 
-const float SIGMA = SAMPLE_RADIUS / 2.5; // Gaussian weight spread in sample grid steps
+// Controls how quickly sample weights fall off with distance from the center
+// At 3σ, Gaussian weights are only ~1% of the center weight,
+// so sampling farther out contributes very little.
+const float SIGMA = float(SAMPLE_RADIUS) / 2.5;
 
+// NOTE: GLSL built-in pow(x, y) is undefined when x < 0 || (x == 0 && y == 0)
 float sqr(in float x) {
     return x * x;
 }
@@ -55,6 +59,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     }
 
     vec3 glow = sum / total;
+    vec3 bloomColour = baseColour.rgb + glow * clamp(sqr(STRENGTH), 0.0, 1.0);
 
-    fragColor = vec4(baseColour.rgb + glow * clamp(pow(STRENGTH, 2.0), 0.0, 1.0), baseColour.a);
+    fragColor = vec4(bloomColour, baseColour.a);
 }
