@@ -9,27 +9,29 @@ precision highp float;
 
 #endif // end of the dev setup
 
-const float STRENGTH = 1.0;
-const float RADIUS = 0.65;
+const float STRENGTH = 0.2; // [0..1]
+const float RADIUS = 0.65; // [0..1] uv units
 
-const float AMBIENT_R = 1.0;
-const float AMBIENT_G = 1.0;
-const float AMBIENT_B = 1.0;
+const int AMBIENT_COLOUR = 0xFFFFFF;
+
+vec3 hexToRGB(in int hex) {
+    int r = hex >> (2 * 8) & 0x0000FF;
+    int g = hex >> (1 * 8) & 0x0000FF;
+    int b = hex >> (0 * 8) & 0x0000FF;
+    return vec3(r, g, b) / 256.0;
+}
 
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
     vec4 baseColour = texture(iChannel0, uv).rgba;
 
     vec2 centre = vec2(0.5);
-    vec3 ambientLightColour = vec3(AMBIENT_R, AMBIENT_G, AMBIENT_B);
+    float strength = clamp(STRENGTH, 0.0, 1.0) * 0.015; // Scale light strength to 1.5% of its maximum
 
-    // inverted distance from current coordinates in uv to the center of the screen 1..0
     float distanceToEdges = 1.0 - distance(uv, centre);
-    float spotLight = smoothstep(1.0 - RADIUS, 1.0, distanceToEdges);
-    // reduce intensity of the light with last multiplication
-    float ambientLightStrength = spotLight * STRENGTH * 0.015;
+    float ambientLight = smoothstep(1.0 - RADIUS, 1.0, distanceToEdges) * strength;
 
-    vec3 ambientColour = mix(baseColour.rgb, ambientLightColour, ambientLightStrength);
+    vec3 ambientColour = mix(baseColour.rgb, hexToRGB(AMBIENT_COLOUR), ambientLight);
 
     fragColour = vec4(ambientColour, baseColour.a);
 }
