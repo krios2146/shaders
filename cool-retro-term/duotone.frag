@@ -35,12 +35,13 @@ void mainImage(out vec4 fragColour, in vec2 fragCoord) {
 
     baseColour.rgb = toSRGB(baseColour.rgb);
 
+    vec3 WHITE_COLOUR = hexToRGB(0xFFFFFF);
     vec3 FOREGROUND_COLOUR = hexToRGB(0x00FF00);
     vec3 BACKGROUND_COLOUR = hexToRGB(0x000000);
 
     float brightness = clamp(luma(baseColour.rgb, COOL_RETRO_TERM_WEIGHTS), 0.0, 1.0);
 
-    vec3 saturatedForeground = mix(FOREGROUND_COLOUR, vec3(1.0), (1.0 - SATURATION) * 0.5);
+    vec3 saturatedForeground = mix(FOREGROUND_COLOUR, WHITE_COLOUR, (1.0 - SATURATION) * 0.5);
 
     float blend = CONTRAST_ENABLED ? 0.7 + CONTRAST * 0.3 : 1.0;
 
