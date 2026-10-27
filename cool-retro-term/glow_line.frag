@@ -3,7 +3,6 @@ const float HEIGHT = 0.065; // uv units
 const float OFFSCREEN = 0.25;
 const float STRENGTH = 2.0;
 
-// BUG: Strange behaviour with transparent background
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
     vec4 baseColour = texture(iChannel0, uv).rgba;
@@ -16,6 +15,6 @@ void mainImage(out vec4 fragColour, in vec2 fragCoord) {
         float dist = abs(uv.y - line);
         glow = exp(-dist / HEIGHT);
     }
-
-    fragColour = baseColour + baseColour * glow * STRENGTH;
+    vec3 glowLine = baseColour.rgb + baseColour.rgb * glow * STRENGTH;
+    fragColour = vec4(glowLine, baseColour.a);
 }
