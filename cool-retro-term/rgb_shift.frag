@@ -1,5 +1,5 @@
-const float SHIFT_PX = 2.0;
 const float STRENGTH = 0.5;
+const float SHIFT_PX = 2.0;
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
