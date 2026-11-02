@@ -112,13 +112,6 @@ equivalent configuration option
 Rasterization effects implemented in shaders only affect the final screen image;
 they do not change how the fonts themselves are rendered
 
-### Effects FPS
-
-Some effects have a `RATE` constant that affects the perceived FPS of the effect
-
-Not all effects have it, which is why this section exists. Maybe it will become
-obsolete when I add such a constant to all temporal effects
-
 ### Screen curvature
 
 This isn't a limitation (at least, I don't see why it couldn't be implemented).
