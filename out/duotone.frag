@@ -1,23 +1,12 @@
-#version 300 es
-
-precision highp float;
-
-#ifdef GHOSTTY_UNIFORMS
-
-#extension GL_GOOGLE_include_directive : require
-#include "../ghostty.glsl"
-
-#endif // end of the dev setup
-
 const vec3 REC_709_WEIGHTS = vec3(0.2126, 0.7152, 0.0722);
 const vec3 REC_601_WEIGHTS = vec3(0.299, 0.587, 0.114);
 const vec3 COOL_RETRO_TERM_WEIGHTS = vec3(0.21, 0.72, 0.04);
 
-const float SATURATION = 1.75;
-const float COLOUR_RETENTION = 0.0;
+const float SATURATION = 0.0; 
+const float COLOUR_RETENTION = 0.0; 
 
 const bool CONTRAST_ENABLED = true;
-const float CONTRAST = 0.8;
+const float CONTRAST = 1.0; 
 
 float luma(in vec3 colour, in vec3 weights) {
     return dot(colour, weights);
@@ -27,7 +16,7 @@ vec3 hexToRGB(in int hex) {
     int r = hex >> (2 * 8) & 0x0000FF;
     int g = hex >> (1 * 8) & 0x0000FF;
     int b = hex >> (0 * 8) & 0x0000FF;
-    return vec3(r, g, b) / 256.0;
+    return vec3(r, g, b) / 255.0;
 }
 
 vec3 toSRGB(in vec3 c) {
@@ -41,7 +30,7 @@ vec3 toLinear(in vec3 c) {
 }
 
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
-    vec2 uv = fragCoord / iResolution.xy;
+    vec2 uv = fragCoord / iResolution.xy; 
     vec4 baseColour = texture(iChannel0, uv).rgba;
 
     baseColour.rgb = toSRGB(baseColour.rgb);
