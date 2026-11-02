@@ -18,7 +18,7 @@ const float STRENGTH = 0.5; // [0..1]
 * 1920 × 1080          = 2_073_600     pixels
 * 2_073_600 × 1849     = 3_834_086_400 samples per single frame
 */
-const float SAMPLE_RADIUS = 21.0;
+const int SAMPLE_RADIUS = 21;
 
 /*
 * Controls how quickly sample weights fall off with distance from the centre
@@ -27,8 +27,11 @@ const float SAMPLE_RADIUS = 21.0;
 */
 const float SIGMA = float(SAMPLE_RADIUS) / 2.5;
 
-// NOTE: built-in pow(x, y) is undefined for x < 0 || (x == 0 && y == 0)
+// NOTE: built-in pow(x, y) is undefined for x < 0 || (x == 0 && y <= 0)
 float sqr(in float x) {
+    return x * x;
+}
+int sqr(in int x) {
     return x * x;
 }
 
@@ -66,10 +69,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec3 weightedColourSum = vec3(0.0);
     float totalWeight = 0.0;
 
-    for (float x = -SAMPLE_RADIUS; x <= SAMPLE_RADIUS; x++) {
+    for (int x = -SAMPLE_RADIUS; x <= SAMPLE_RADIUS; x++) {
         // PERFORMANCE: Initialise y such that x + y is even, then step by 2.
         // Processing samples in checkerboard pattern, shedding 50% of the samples
-        for (float y = -SAMPLE_RADIUS + mod(x + SAMPLE_RADIUS, 2.0); y <= SAMPLE_RADIUS; y += 2.0) {
+        for (int y = -SAMPLE_RADIUS + (x + SAMPLE_RADIUS) % 2; y <= SAMPLE_RADIUS; y += 2) {
             // PERFORMANCE: Process only samples inside the circle
             // Sheds ~21% (1 - π/4) of samples
             if (sqr(x) + sqr(y) > sqr(SAMPLE_RADIUS)) {
@@ -79,7 +82,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
             // HACK: Half-pixel shift (0.5) enables sample to land on the shared corner of four texels.
             // Exploits Ghostty's bilinear filtering
             vec2 offset = vec2(x, y) * 2.0 + 0.5;
-            float weight = weights[int(abs(x))] * weights[int(abs(y))];
+            float weight = weights[abs(x)] * weights[abs(y)];
 
             weightedColourSum += texture(iChannel0, uv + offset * pxSize).rgb * weight;
             totalWeight += weight;
@@ -87,7 +90,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     }
 
     vec3 glow = weightedColourSum / totalWeight;
-    vec3 bloomColour = baseColour.rgb + glow * clamp(sqr(STRENGTH), 0.0, 1.0);
+    vec3 bloomColour = baseColour.rgb + glow * sqr(STRENGTH);
 
     fragColor = vec4(bloomColour, baseColour.a);
 }
