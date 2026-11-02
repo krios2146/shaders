@@ -10,7 +10,7 @@ precision highp float;
 #endif // end of the dev setup
 
 const float STRENGTH = 1.35; // [0..1]
-const float RATE = 10.0; // Updates per second
+const float FREQUENCY = 10.0; // Updates per second [Hz]
 
 float hash(in vec2 p) {
     vec3 p3 = fract(vec3(p.xyx * 0.1031));
@@ -25,7 +25,7 @@ float hash(in vec2 p) {
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy; // [0..1]
     vec2 pxSize = 1.0 / iResolution.xy;
-    float frame = floor(iTime * RATE);
+    float frame = floor(iTime * FREQUENCY);
 
     float strength = clamp(STRENGTH, 0.0, 1.0);
     float syncProbability = pow(strength, 3.0);

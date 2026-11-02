@@ -10,7 +10,7 @@ precision highp float;
 #endif // end of the dev setup
 
 const float STRENGTH = 1.0; // [0..1]
-const float FREQUENCY = 60.0; // Glow line updates per second
+const float FREQUENCY = 60.0; // Updates per second [Hz]
 
 const float SPEED_PX_SEC = 200.0;
 const float HEIGHT_PX = 250.0;

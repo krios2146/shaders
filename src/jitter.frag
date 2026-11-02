@@ -10,7 +10,7 @@ precision highp float;
 #endif // end of the dev setup
 
 const float STRENGTH = 0.5; // [0..1]
-const float RATE = 10.0; // Updates per second
+const float FREQUENCY = 10.0; // Updates per second [Hz]
 
 float hash(in vec3 p3) {
     p3 = fract(p3 * vec3(0.1031, 0.1030, 0.0973));
@@ -25,7 +25,7 @@ void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy; // [0..1]
     vec2 pxSize = 1.0 / iResolution.xy;
 
-    float frame = floor(iTime * RATE);
+    float frame = floor(iTime * FREQUENCY);
 
     // Tuned to mimic cool-retro-term
     float amplitudeX = 2.5;

@@ -1,6 +1,6 @@
 const float STRENGTH = 0.1; 
 
-const float RATE = 10.0; 
+const float FREQUENCY = 10.0; 
 const float BLOCK_SIZE_PX = 3.0;
 
 float hash(in vec3 p) {
@@ -13,7 +13,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy; 
     vec4 baseColour = texture(iChannel0, uv);
 
-    float frame = floor(iTime * RATE);
+    float frame = floor(iTime * FREQUENCY);
     vec2 block = floor(fragCoord / BLOCK_SIZE_PX);
 
     float noise = hash(vec3(block, frame));

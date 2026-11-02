@@ -10,7 +10,7 @@ precision highp float;
 #endif // end of the dev setup
 
 const float STRENGTH = 1.0; // [0..1]
-const float FREQUENCY = 10.0; // Flicker updates per second
+const float FREQUENCY = 10.0; // Updates per second [Hz]
 
 float hash(float p) {
     p = fract(p * .1031);
