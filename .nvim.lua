@@ -38,7 +38,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
         local sub_line, count = line:gsub("//.*", "")
         if count <= 0 then
           table.insert(filtered_lines, line)
-        elseif sub_line ~= "" then
+        elseif sub_line:match("%S") then
           table.insert(filtered_lines, sub_line)
         end
       end
