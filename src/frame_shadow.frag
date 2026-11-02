@@ -1,0 +1,34 @@
+#version 300 es
+
+precision highp float;
+
+#ifdef GHOSTTY_UNIFORMS
+
+#extension GL_GOOGLE_include_directive : require
+#include "../ghostty.glsl"
+
+#endif // end of the dev setup
+
+const float STRENGTH = 1.0; // [0..1]
+
+const float BORDER_PX = 5.0;
+const float FALLOFF_POW = 2.0;
+
+/*
+* Applies a bezel screen / frame shadow effect, darkening more towards edges
+*/
+void mainImage(out vec4 fragColour, in vec2 fragCoord) {
+    vec2 uv = fragCoord.xy / iResolution.xy; // [0..1]
+    vec4 baseColour = texture(iChannel0, uv).rgba;
+    vec2 pxSize = 1.0 / iResolution.xy;
+
+    vec2 parabolas = (uv * (1.0 - uv)) * 4.0; // [0..0.25] => [0..1]
+    float borderParabola = (BORDER_PX * pxSize.x * (1.0 - BORDER_PX * pxSize.x)) * 4.0;
+
+    float shadow = clamp((parabolas.x * parabolas.y) / borderParabola, 0.0, 1.0);
+    shadow = pow(shadow, FALLOFF_POW);
+
+    float brightness = mix(1.0, shadow, STRENGTH);
+
+    fragColour = vec4(baseColour.rgb * brightness, baseColour.a);
+}
