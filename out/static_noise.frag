@@ -1,0 +1,25 @@
+const float STRENGTH = 0.1; 
+
+const float RATE = 10.0; 
+const float BLOCK_SIZE_PX = 3.0;
+
+float hash(in vec3 p) {
+    vec3 p3 = fract(p * vec3(0.1031, 0.1030, 0.0973));
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+    vec2 uv = fragCoord / iResolution.xy; 
+    vec4 baseColour = texture(iChannel0, uv);
+
+    float frame = floor(iTime * RATE);
+    vec2 block = floor(fragCoord / BLOCK_SIZE_PX);
+
+    float noise = hash(vec3(block, frame));
+    float offset = STRENGTH * (noise - 0.5);
+
+    vec3 noisyColour = mix(baseColour.rgb, baseColour.rgb + offset, 0.05);
+
+    fragColor = vec4(noisyColour, baseColour.a);
+}
