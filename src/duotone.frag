@@ -65,7 +65,7 @@ void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     vec3 foregroundColour = mix(BACKGROUND_COLOUR, saturatedForeground, blend);
     vec3 backgroundColour = mix(saturatedForeground, BACKGROUND_COLOUR, blend);
 
-    vec3 tinted = mix(foregroundColour, baseColour.rgb * foregroundColour / max(brightness, 1e-5), COLOUR_RETENTION);
+    vec3 retainedColour = mix(foregroundColour, baseColour.rgb * foregroundColour / max(brightness, 1e-5), COLOUR_RETENTION);
 
-    fragColour = vec4(toLinear(clamp(mix(backgroundColour, tinted, brightness), 0.0, 1.0)), baseColour.a);
+    fragColour = vec4(toLinear(clamp(mix(backgroundColour, retainedColour, brightness), 0.0, 1.0)), baseColour.a);
 }
