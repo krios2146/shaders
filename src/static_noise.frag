@@ -22,6 +22,9 @@ float hash(in vec3 p) {
 
 /*
 * Applies monochromatic, spatially uniform noise to the image
+*
+* TODO: Make noise spatially non-uniform: decrease block size and effect strength
+* with increasing distance from the screen centre
 */
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy; // [0..1]
