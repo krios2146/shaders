@@ -1,25 +1,13 @@
-#version 300 es
-
-precision highp float;
-
-#ifdef GHOSTTY_UNIFORMS
-
-#extension GL_GOOGLE_include_directive : require
-#include "../ghostty.glsl"
-
-#endif // end of the dev setup
-
-const float STRENGTH = 0.5;
-const float RATE = 10.0;
+const float STRENGTH = 0.5; 
+const float RATE = 10.0; 
 
 float hash(in vec3 p3) {
     p3 = fract(p3 * vec3(0.1031, 0.1030, 0.0973));
     p3 += dot(p3, p3.yzx + 33.33);
     return fract((p3.x + p3.y) * p3.z);
 }
-
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
-    vec2 uv = fragCoord / iResolution.xy;
+    vec2 uv = fragCoord / iResolution.xy; 
     vec2 pxSize = 1.0 / iResolution.xy;
 
     float frame = floor(iTime * RATE);
