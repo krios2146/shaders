@@ -9,7 +9,7 @@ precision highp float;
 
 #endif // end of the dev setup
 
-const float STRENGTH = 1.4; // [0..1]
+const float STRENGTH = 1.0; // [0..1]
 const float FREQUENCY = 10.0; // Flicker updates per second
 
 float hash(float p) {
@@ -19,6 +19,9 @@ float hash(float p) {
     return fract(p);
 }
 
+/*
+* Applies uniform, time-stepped brightness flicker
+*/
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
     vec4 baseColour = texture(iChannel0, uv).rgba;
