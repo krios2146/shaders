@@ -1,5 +1,16 @@
-const float STRENGTH = .35;
-const float RATE = 10.0;
+#version 300 es
+
+precision highp float;
+
+#ifdef GHOSTTY_UNIFORMS
+
+#extension GL_GOOGLE_include_directive : require
+#include "../ghostty.glsl"
+
+#endif // end of the dev setup
+
+const float STRENGTH = 1.35; // [0..1]
+const float RATE = 10.0; // Updates per second
 
 float hash(in vec2 p) {
     vec3 p3 = fract(vec3(p.xyx * 0.1031));
@@ -7,8 +18,12 @@ float hash(in vec2 p) {
     return fract((p3.x + p3.y) * p3.z);
 }
 
+/*
+* Applies a horizontally oscillating distortion effect with randomly varying
+* frequency, intensity and synchronisation
+*/
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
-    vec2 uv = fragCoord / iResolution.xy;
+    vec2 uv = fragCoord / iResolution.xy; // [0..1]
     vec2 pxSize = 1.0 / iResolution.xy;
     float frame = floor(iTime * RATE);
 
@@ -18,7 +33,7 @@ void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     // Max sine wave horizontal displacement
     float maxAmplitude = strength * 60.0 * pxSize.x;
 
-    // Sine frequency - cycles per screen height
+    // Sine angular frequency in radians per screen height
     float freqMin = strength * 5.0;
     float freqMax = freqMin * 5.0;
 
