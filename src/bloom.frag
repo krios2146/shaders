@@ -1,0 +1,93 @@
+#version 300 es
+
+precision highp float;
+
+#ifdef GHOSTTY_UNIFORMS
+
+#extension GL_GOOGLE_include_directive : require
+#include "../ghostty.glsl"
+
+#endif // end of the dev setup
+
+const float STRENGTH = 0.5; // [0..1]
+
+/*
+* PERFORMANCE: Produces (2n + 1)² samples per pixel without optimisations
+* Let SAMPLE_RADIUS    = 21
+* (2 × 21 + 1)² = 43²  = 1849          samples per pixel
+* 1920 × 1080          = 2_073_600     pixels
+* 2_073_600 × 1849     = 3_834_086_400 samples per single frame
+*/
+const float SAMPLE_RADIUS = 21.0;
+
+/*
+* Controls how quickly sample weights fall off with distance from the centre
+* At 3σ, Gaussian weights are only ~1% of the center weight,
+* so sampling farther out contributes very little.
+*/
+const float SIGMA = float(SAMPLE_RADIUS) / 2.5;
+
+// NOTE: built-in pow(x, y) is undefined for x < 0 || (x == 0 && y == 0)
+float sqr(in float x) {
+    return x * x;
+}
+
+/*
+* Applies a Gaussian-like weighted bloom effect by sampling the source texture
+* around each fragment and adding the accumulated glow to the original colour.
+
+* The resulting glow is normalised by the sum of sample weights to prevent
+* brightness from scaling with the number of samples.
+*
+* PERFORMANCE:
+* - Precomputes one-dimensional Gaussian weights and exploits their
+*   separability and symmetry to avoid redundant calculations
+* - Samples only every other position in a checkerboard pattern, reducing
+*   the number of samples by 50%
+* - Restricts sampling to a circular region, reducing the remaining samples
+*   by ~21%
+*/
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+    vec2 uv = fragCoord / iResolution.xy; // [0..1]
+    vec4 baseColour = texture(iChannel0, uv);
+    vec2 pxSize = 1.0 / iResolution.xy;
+
+    const int radiusSteps = int(SAMPLE_RADIUS);
+
+    float[radiusSteps + 1] weights;
+
+    // PERFORMANCE: Precomputing weights exploiting properties:
+    // 1. exp(−(x²+y²)/(2σ²)) == exp(−x²/(2σ²)) × exp(−y²/(2σ²))
+    // 2. weights are symmetric i.e. weights[−i] == weights[i]
+    for (int i = 0; i <= radiusSteps; i++) {
+        weights[i] = exp(-sqr(float(i)) / (2.0 * sqr(SIGMA))); // [0..1]
+    }
+
+    vec3 weightedColourSum = vec3(0.0);
+    float totalWeight = 0.0;
+
+    for (float x = -SAMPLE_RADIUS; x <= SAMPLE_RADIUS; x++) {
+        // PERFORMANCE: Initialise y such that x + y is even, then step by 2.
+        // Processing samples in checkerboard pattern, shedding 50% of the samples
+        for (float y = -SAMPLE_RADIUS + mod(x + SAMPLE_RADIUS, 2.0); y <= SAMPLE_RADIUS; y += 2.0) {
+            // PERFORMANCE: Process only samples inside the circle
+            // Sheds ~21% (1 - π/4) of samples
+            if (sqr(x) + sqr(y) > sqr(SAMPLE_RADIUS)) {
+                continue;
+            }
+
+            // HACK: Half-pixel shift (0.5) enables sample to land on the shared corner of four texels.
+            // Exploits Ghostty's bilinear filtering
+            vec2 offset = vec2(x, y) * 2.0 + 0.5;
+            float weight = weights[int(abs(x))] * weights[int(abs(y))];
+
+            weightedColourSum += texture(iChannel0, uv + offset * pxSize).rgb * weight;
+            totalWeight += weight;
+        }
+    }
+
+    vec3 glow = weightedColourSum / totalWeight;
+    vec3 bloomColour = baseColour.rgb + glow * clamp(sqr(STRENGTH), 0.0, 1.0);
+
+    fragColor = vec4(bloomColour, baseColour.a);
+}
