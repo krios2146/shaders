@@ -21,7 +21,7 @@ const float OFFSCREEN_PX = HEIGHT_PX / 2.0;
 */
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy; // [0..1]
-    vec4 baseColour = texture(iChannel0, uv).rgba;
+    vec4 baseColour = texture(iChannel0, uv);
     float pxSize = 1.0 / iResolution.y;
     float frame = floor(iTime * FREQUENCY) / FREQUENCY;
 
@@ -37,7 +37,7 @@ void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     float glowIntensity = 1.0 - (distance(lineY, uv.y) / (HEIGHT_PX * pxSize));
     float glow = smoothstep(0.0, 1.0, glowIntensity);
 
-    vec3 glowLineColour = baseColour.rgb + baseColour.rgb * glow * clamp(STRENGTH, 0.0, 1.0) * 2.15;
+    vec3 glowLineColour = baseColour.rgb + baseColour.rgb * glow * clamp(STRENGTH, 0.0, 1.0) * 5.5;
 
     fragColour = vec4(glowLineColour, baseColour.a);
 }
