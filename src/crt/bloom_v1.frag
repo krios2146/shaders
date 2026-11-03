@@ -5,9 +5,9 @@ precision highp float;
 #ifdef GHOSTTY_UNIFORMS
 
 #extension GL_GOOGLE_include_directive : require
-#include "../ghostty.glsl"
+#include "../../ghostty_uniforms.glsl"
 
-#endif
+#endif // end of the dev setup
 
 const float GAMMA = 2.2;
 
@@ -18,11 +18,11 @@ const float LUMINANCE_THRESHOLD = 0.25;
 const float LUMINANCE_SOFTNESS = 1.0;
 const float LUMINANCE_KNEE = max(LUMINANCE_THRESHOLD * LUMINANCE_SOFTNESS, 1e-5);
 
-const float BLUR_RADIUS = 2.5;
-const float BLUR_INTENSITY = 5.0;
+const float BLUR_RADIUS = 20.5;
+const float BLUR_INTENSITY = 15.0;
 
 const float BLUR_OFFSET_START = BLUR_RADIUS * -1.0;
-const float BLUR_OFFSET_END = BLUR_RADIUS;
+const float BLUR_OFFSET_END = BLUR_RADIUS * 2.0;
 
 const float SIGMA = BLUR_RADIUS / 3.0;
 
@@ -44,6 +44,10 @@ float weight(in float x, in float y) {
     return exp(-1.0 * (x * x + y * y) / (2.0 * pow(SIGMA, 2.0)));
 }
 
+/* ARCHIVED: first bloom version, a full 2D blur with per-tap soft-knee threshold
+*
+* Abandoned because resulting effect was too blocky and expensive at big BLUR_RADIUS values
+*/
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
     vec4 baseColour = texture(iChannel0, uv).rgba;

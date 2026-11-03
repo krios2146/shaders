@@ -1,7 +1,7 @@
-const float STRENGTH = 0.25;
+const float STRENGTH = 1.0;
 const float QUALITY = 1.0;
 
-const float SAMPLE_RADIUS = 21.0;
+const float SAMPLE_RADIUS = 10.0;
 const float SIGMA = SAMPLE_RADIUS / 3.0;
 
 float sqr(in float x) {
@@ -18,7 +18,6 @@ vec3 blurAtScale(vec2 uv, vec2 pxSize, float radius) {
 
             float r2 = sqr(x) + sqr(y);
 
-            // sample inside the circle shape
             if (r2 > sqr(SAMPLE_RADIUS)) {
                 continue;
             }

@@ -5,14 +5,14 @@ precision highp float;
 #ifdef GHOSTTY_UNIFORMS
 
 #extension GL_GOOGLE_include_directive : require
-#include "../ghostty.glsl"
+#include "../../ghostty_uniforms.glsl"
 
-#endif
+#endif // end of the dev setup
 
-const float STRENGTH = 0.25;
+const float STRENGTH = 1.0;
 const float QUALITY = 1.0;
 
-const float SAMPLE_RADIUS = 21.0;
+const float SAMPLE_RADIUS = 10.0;
 const float SIGMA = SAMPLE_RADIUS / 3.0;
 
 float sqr(in float x) {
@@ -44,6 +44,13 @@ vec3 blurAtScale(vec2 uv, vec2 pxSize, float radius) {
     return sum / total;
 }
 
+/* ARCHIVED: second bloom version, attempt to reproduce multiple passes
+*
+* Abandoned because resulting effect was more of an astigmatism simulation
+* rather then blur and it is also expensive at bigger SAMPLE_RADIUS values
+*
+* The astigmatism simulation is pretty good though
+*/
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
     vec4 baseColour = texture(iChannel0, uv);

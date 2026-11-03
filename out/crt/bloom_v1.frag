@@ -7,20 +7,18 @@ const float LUMINANCE_THRESHOLD = 0.25;
 const float LUMINANCE_SOFTNESS = 1.0;
 const float LUMINANCE_KNEE = max(LUMINANCE_THRESHOLD * LUMINANCE_SOFTNESS, 1e-5);
 
-const float BLUR_RADIUS = 2.5;
-const float BLUR_INTENSITY = 5.0;
+const float BLUR_RADIUS = 20.5;
+const float BLUR_INTENSITY = 15.0;
 
 const float BLUR_OFFSET_START = BLUR_RADIUS * -1.0;
-const float BLUR_OFFSET_END = BLUR_RADIUS;
+const float BLUR_OFFSET_END = BLUR_RADIUS * 2.0;
 
 const float SIGMA = BLUR_RADIUS / 3.0;
 
-// aka encode
 vec3 toSRGB(in vec3 colour) {
     return pow(colour, vec3(1.0 / GAMMA));
 }
 
-// aka decode
 vec3 toLinear(in vec3 colour) {
     return pow(colour, vec3(GAMMA));
 }
