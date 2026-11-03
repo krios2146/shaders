@@ -15,11 +15,7 @@ const float ROUGHNESS = 0.1;
 
 const float TRESHOLD = 0.55;
 
-// NOTE: I have no idea what is happening here,
-// but it doesn't look like a horizontal sync from the cool-retro-term
-// that I wanted to recreate
 
-// FIX: Naming is awful
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
 
