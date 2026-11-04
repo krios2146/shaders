@@ -1,0 +1,4 @@
+font-family = "Terminus"
+font-size = 26
+
+custom-shader = "./monochrome_green.frag"
