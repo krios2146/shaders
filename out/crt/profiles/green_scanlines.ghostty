@@ -1,0 +1,9 @@
+font-family = "Pro Font"
+# Assumes bitmap font version is installed
+font-size = 28 
+
+window-padding-x = 15
+window-padding-y = 10
+window-padding-balance = true
+
+custom-shader = "./green_scanlines.frag"
