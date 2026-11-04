@@ -1,4 +1,4 @@
 font-family = "Terminus"
 font-size = 26
 
-custom-shader=./default_amber.frag
+custom-shader = "./default_amber.frag"
