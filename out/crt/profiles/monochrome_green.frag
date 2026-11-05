@@ -140,9 +140,8 @@ vec3 applyBloom(in vec3 base, in vec2 uv) {
 }
 
 vec3 applyBrightness(in vec3 base) {
-    const float BRIGHTNESS = 1.0;
-
-    return toLinear(toSRGB(base) * clamp(BRIGHTNESS + 0.5, 0.5, 1.5));
+    const float BRIGHTNESS = 0.5;
+    return toLinear(toSRGB(base) * (BRIGHTNESS + 1.0));
 }
 
 vec3 applyStaticNoise(in vec3 base, in vec2 coord) {
