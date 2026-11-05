@@ -1,0 +1,10 @@
+# TODO: Actual font
+
+# font-family = "Terminus"
+# font-size = 26
+
+window-padding-x = 15
+window-padding-y = 10
+window-padding-balance = true
+
+custom-shader = "./ibm_3278.frag"
