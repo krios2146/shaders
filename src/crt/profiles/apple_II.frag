@@ -274,6 +274,25 @@ vec3 applyAmbientLight(in vec3 base, in vec2 uv) {
     return ambientColour;
 }
 
+vec3 applyRasterisation(in vec3 base, in vec2 uv) {
+    const float STRENGTH = 0.25; // [0..1]
+
+    const float VIRT_PX_SIZE = 5.0; // [x..]; x >= 1, preferably >= 3
+
+    vec2 virtualResolution = iResolution.xy / VIRT_PX_SIZE;
+
+    vec3 foregroundColour = base * (1.0 + STRENGTH * (1.0 - base));
+    vec3 backgroundColour = base * (1.0 - STRENGTH * (1.0 - base));
+
+    vec2 cellCoord = abs(fract(uv * virtualResolution) * 2.0 - 1.0);
+
+    float mask = smoothstep(0.0, 1.0, 1.0 - cellCoord.y);
+
+    vec3 rasterisationColour = mix(backgroundColour, foregroundColour, mask);
+
+    return rasterisationColour;
+}
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 screenUv = fragCoord / iResolution.xy;
     vec4 base = texture(iChannel0, screenUv);
@@ -302,6 +321,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     effect = applyFrameShadow(effect, screenUv);
     effect = applyFlicker(effect);
     effect = applyAmbientLight(effect, screenUv);
+    effect = applyRasterisation(effect, screenUv);
 
     fragColor = vec4(effect, base.a);
 }
