@@ -220,6 +220,26 @@ vec3 applyFlicker(in vec3 base) {
     return base * flicker;
 }
 
+vec3 applyRasterisation(in vec3 base, in vec2 uv) {
+    const float STRENGTH = 0.25; 
+
+    const float VIRT_PX_SIZE = 5.0; 
+
+    vec2 virtualResolution = iResolution.xy / VIRT_PX_SIZE;
+
+    vec3 foregroundColour = base * (1.0 + STRENGTH * (1.0 - base));
+    vec3 backgroundColour = base * (1.0 - STRENGTH * (1.0 - base));
+
+    vec2 cellCoord = abs(fract(uv * virtualResolution) * 2.0 - 1.0);
+
+    float gap = log(VIRT_PX_SIZE) / VIRT_PX_SIZE;
+    float mask = step(gap, 1.0 - max(cellCoord.x, cellCoord.y));
+
+    vec3 rasterisationColour = mix(backgroundColour, foregroundColour, mask);
+
+    return rasterisationColour;
+}
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 screenUv = fragCoord / iResolution.xy;
     vec4 base = texture(iChannel0, screenUv);
@@ -241,6 +261,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     effect = applyFrameShadow(effect, screenUv);
     effect = applyFlicker(effect);
+    effect = applyRasterisation(effect, screenUv);
 
     fragColor = vec4(effect, base.a);
 }
