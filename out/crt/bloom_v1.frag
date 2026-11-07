@@ -33,7 +33,7 @@ float weight(in float x, in float y) {
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
-    vec4 baseColour = texture(iChannel0, uv).rgba;
+    vec4 baseColour = texture(iChannel0, uv);
     baseColour = vec4(toLinear(baseColour.rgb), baseColour.a);
 
     vec3 accumulator = vec3(0.0);

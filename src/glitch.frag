@@ -54,6 +54,6 @@ void mainImage(out vec4 fragColour, in vec2 fragCoord) {
 
     uv.x += shift * pixelSize.x;
 
-    vec4 baseColour = texture(iChannel0, uv).rgba;
+    vec4 baseColour = texture(iChannel0, uv);
     fragColour = baseColour;
 }

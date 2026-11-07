@@ -19,7 +19,7 @@ const float FALLOFF_POW = 2.0;
 */
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     vec2 uv = fragCoord.xy / iResolution.xy; // [0..1]
-    vec4 baseColour = texture(iChannel0, uv).rgba;
+    vec4 baseColour = texture(iChannel0, uv);
     vec2 pxSize = 1.0 / iResolution.xy;
 
     vec2 parabolas = (uv * (1.0 - uv)) * 4.0; // [0..0.25] => [0..1]

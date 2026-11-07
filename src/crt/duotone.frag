@@ -48,7 +48,7 @@ vec3 toLinear(in vec3 c) {
 */
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy; // [0..1]
-    vec4 baseColour = texture(iChannel0, uv).rgba;
+    vec4 baseColour = texture(iChannel0, uv);
 
     baseColour.rgb = toSRGB(baseColour.rgb);
 

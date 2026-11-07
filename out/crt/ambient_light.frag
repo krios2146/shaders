@@ -12,7 +12,7 @@ vec3 hexToRGB(in int hex) {
 
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy; 
-    vec4 baseColour = texture(iChannel0, uv).rgba;
+    vec4 baseColour = texture(iChannel0, uv);
 
     float strength = clamp(STRENGTH, 0.0, 1.0) * 0.015; 
     float distanceToCentre = distance(uv, vec2(0.5)); 

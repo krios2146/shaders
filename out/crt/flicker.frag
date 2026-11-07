@@ -10,7 +10,7 @@ float hash(float p) {
 
 void mainImage(out vec4 fragColour, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
-    vec4 baseColour = texture(iChannel0, uv).rgba;
+    vec4 baseColour = texture(iChannel0, uv);
 
     float random = hash(floor(iTime * FREQUENCY));
     float flicker = 1.0 - random * clamp(STRENGTH, 0.0, 1.0);
